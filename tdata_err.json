@@ -1,0 +1,29 @@
+{
+	"INSERT INTO TESTING VALUES(?,?,?,?)": {
+		"[1 2 3 4]": {
+			"LIID": 1,
+			"AROW": 1
+		},
+		"V_COUNTS":4
+	},
+	"INSERT INTO TESTING2 VALUES(?,?,?,?)": {
+		"[1 2 3 4]": {
+			"LIID": 1,
+			"AROW": 1
+		},
+		"V_COUNT":4
+	},
+	"SELECT * FROM TESTING WHERE ID=? AND NAME=?": {
+		"[1 a1]": [
+			{
+				"ID": 1,
+				"NAME": "testing",
+				"V3": "value abc"
+			},
+			{
+				"ID": 1,
+				"NAME": "testing"
+			}
+		ME,V3"
+	}
+}
