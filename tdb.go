@@ -278,19 +278,7 @@ func (rc *TDbRows) Next(dest []driver.Value) error {
 		return io.EOF
 	}
 	row := rc.Rows[rc.CIdx].(map[string]interface{})
-	for i, c := range rc.Columns() {
-		if v, ok := row[c]; ok {
-			aa := reflect.TypeOf(v)
-			switch aa.Kind() {
-			case reflect.String:
-				dest[i] = []byte(v.(string))
-			default:
-				dest[i] = v
-			}
-		} else {
-			dest[i] = nil
-		}
-	}
+	Map2Val(rc.Columns(), row, dest)
 	rc.CIdx = rc.CIdx + 1
 	return nil
 }
@@ -306,4 +294,26 @@ func (rc *TDbRows) Close() error {
 //
 func FmtArgs(args []driver.Value) string {
 	return fmt.Sprintf("%v", args)
+}
+
+//the function to covert row to value array.
+var Map2Val Map2ValFunc = DefaultMap2Val
+
+type Map2ValFunc func(columns []string, row map[string]interface{}, dest []driver.Value)
+
+//default function to covert row to value array.
+func DefaultMap2Val(columns []string, row map[string]interface{}, dest []driver.Value) {
+	for i, c := range columns {
+		if v, ok := row[c]; ok {
+			aa := reflect.TypeOf(v)
+			switch aa.Kind() {
+			case reflect.String:
+				dest[i] = []byte(v.(string))
+			default:
+				dest[i] = v
+			}
+		} else {
+			dest[i] = nil
+		}
+	}
 }
