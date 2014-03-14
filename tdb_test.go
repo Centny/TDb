@@ -29,6 +29,13 @@ func TestTDb(t *testing.T) {
 	}
 	fmt.Println(res.LastInsertId())
 	fmt.Println(res.RowsAffected())
+	res, err = tx.Exec("INSERT INTO T2 VALUES(?,?,?,?)", 1, 2, 3, 6)
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	fmt.Println(res.LastInsertId())
+	fmt.Println(res.RowsAffected())
 	tx.Commit()
 	tx, err = db.Begin()
 	if err != nil {
@@ -36,6 +43,12 @@ func TestTDb(t *testing.T) {
 		return
 	}
 	rows, err := tx.Query("SELECT * FROM TESTING WHERE ID=? AND NAME=?", 1, "a1")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	fmt.Println(dbutil.DbRow2Map(rows))
+	rows, err = tx.Query("SELECT * FROM T2 WHERE ID=? AND NAME=?", 1, "a8")
 	if err != nil {
 		t.Error(err.Error())
 		return

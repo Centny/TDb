@@ -18,7 +18,7 @@ import (
 var Err error = errors.New("TDb testing error")
 
 //create new not found error.
-func NotFoundErr(msg ...interface{}) error {
+func NotFoundErr(msg interface{}) error {
 	return errors.New(fmt.Sprintf("data not found %v", msg))
 }
 
@@ -230,7 +230,11 @@ func (s *TDbStmt) Query(args []driver.Value) (driver.Rows, error) {
 	if TarErrs.Is(STMT_QUERY_ERR) {
 		return nil, Err
 	}
-	if mv, ok := s.TData[FmtArgs(args)]; ok {
+	mv, ok := s.TData[FmtArgs(args)]
+	if !ok {
+		mv, ok = s.TData["*"]
+	}
+	if ok {
 		trow := TDbRows{}
 		trow.Args = args
 		trow.Stmt = s
@@ -246,7 +250,11 @@ func (s *TDbStmt) Exec(args []driver.Value) (driver.Result, error) {
 	if TarErrs.Is(STMT_EXEC_ERR) {
 		return nil, Err
 	}
-	if mv, ok := s.TData[FmtArgs(args)]; ok {
+	mv, ok := s.TData[FmtArgs(args)]
+	if !ok {
+		mv, ok = s.TData["*"]
+	}
+	if ok {
 		res := mv.(map[string]interface{})
 		tres := TDbResult{}
 		tres.Args = args
