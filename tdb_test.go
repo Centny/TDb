@@ -286,3 +286,21 @@ func TestIRErr2(t *testing.T) {
 func TestStrCount(t *testing.T) {
 	fmt.Println(strings.Count("aiaagaa", "a"))
 }
+
+func TestErrIs(t *testing.T) {
+	TarErrs = CONN_BEGIN_ERR
+	if !TarErrs.Is(CONN_BEGIN_ERR) {
+		t.Error("not valid")
+	}
+	if TarErrs.Is(CONN_CLOSE_ERR) {
+		t.Error("not valid")
+	}
+	ResetRTarErrsC()
+	SetErrC(CONN_BEGIN_ERR, 1)
+	if TarErrs.Is(CONN_BEGIN_ERR) {
+		t.Error("not valid")
+	}
+	if !TarErrs.Is(CONN_BEGIN_ERR) {
+		t.Error("not valid")
+	}
+}

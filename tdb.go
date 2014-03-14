@@ -41,13 +41,45 @@ const (
 	ROWS_AFFECTED_ERR
 )
 
-//the error will be panic
+//the error will be return
 //usage:Errs=OPEN_ERR|CONN_BEGIN_ERR
 var TarErrs TDbErr = 0
 
+//the error will occur in execute count.
+//for example,TarErrsC[CONN_BEGIN_ERR]=1,it only error occure when begin twice.
+var TarErrsC map[TDbErr]int = map[TDbErr]int{}
+
+//the execute count.
+var RTarErrsC map[TDbErr]int = map[TDbErr]int{}
+
 //if error contain target error.
 func (t TDbErr) Is(e TDbErr) bool {
-	return (t & e) == e
+	defer func() {
+		RTarErrsC[e] = RTarErrsC[e] + 1
+	}()
+	if (t & e) == e {
+		if v1, ok := TarErrsC[e]; ok {
+			if v2, ok := RTarErrsC[e]; ok {
+				return v1 == v2
+			} else {
+				return false
+			}
+		} else {
+			return true
+		}
+	} else {
+		return false
+	}
+}
+
+//set the target error occur on execute count.
+func SetErrC(e TDbErr, c int) {
+	TarErrsC[e] = c
+}
+
+//reset the execute count
+func ResetRTarErrsC() {
+	RTarErrsC = map[TDbErr]int{}
 }
 
 //all testing data from json file.
