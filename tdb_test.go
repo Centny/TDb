@@ -308,7 +308,7 @@ func TestErrIs(t *testing.T) {
 	if TarErrs.Is(CONN_CLOSE_ERR) {
 		t.Error("not valid")
 	}
-	ResetRTarErrsC()
+	ResetErrsC()
 	SetErrC(CONN_BEGIN_ERR, 1)
 	if TarErrs.Is(CONN_BEGIN_ERR) {
 		t.Error("not valid")
@@ -316,4 +316,114 @@ func TestErrIs(t *testing.T) {
 	if !TarErrs.Is(CONN_BEGIN_ERR) {
 		t.Error("not valid")
 	}
+}
+
+func TestErrC(t *testing.T) {
+	ResetErrsC()
+	TarErrs = OPEN_ERR | CONN_BEGIN_ERR
+	SetErrC(OPEN_ERR, 1)
+	SetErrC(CONN_BEGIN_ERR, 2)
+	db, err := sql.Open("TDb", "td@tdata.json")
+	_, err = db.Begin()
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	db, err = sql.Open("TDb", "td@tdata.json")
+	_, err = db.Begin()
+	if err == nil {
+		t.Error("not error")
+		return
+	}
+	_, err = db.Begin()
+	if err != nil {
+		t.Error("error")
+		return
+	}
+	fmt.Println(RTarErrsC)
+}
+func TestErrC2(t *testing.T) {
+	ResetErrsC()
+	db, err := sql.Open("TDb", "td@tdata.json")
+	tx, err := db.Begin()
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	_, err = tx.Exec("INSERT INTO T3 VALUES(?,?,?,?)", 1, 2, 3, "A")
+	if err != Err {
+		t.Error(err.Error())
+		return
+	}
+	_, err = tx.Exec("INSERT INTO T3 VALUES(?,?,?,?)", 1, 2, 3, "A")
+	if err == Err {
+		t.Error(err.Error())
+		return
+	}
+	_, err = tx.Exec("INSERT INTO T3_1 VALUES(?,?,?,?)", 1, 2, 3, "A")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	_, err = tx.Exec("INSERT INTO T3_1 VALUES(?,?,?,?)", 1, 2, 3, "A")
+	if err != Err {
+		t.Error(err.Error())
+		return
+	}
+	_, err = tx.Exec("INSERT INTO T3_1 VALUES(?,?,?,?)", 1, 2, 3, "A")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	//
+	_, err = tx.Exec("INSERT INTO T4 VALUES(?,?,?,?)", 1, 2, 3, "A")
+	if err != Err {
+		t.Error(err.Error())
+		return
+	}
+	_, err = tx.Exec("INSERT INTO T4_1 VALUES(?,?,?,?)", 1, 2, 3, "A")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	_, err = tx.Exec("INSERT INTO T4_1 VALUES(?,?,?,?)", 1, 2, 3, "A")
+	if err != Err {
+		t.Error(err.Error())
+		return
+	}
+	//
+	tx.Commit()
+	_, err = db.Query("SELECT * FROM T3 WHERE ID=? AND NAME=?", 1, "A")
+	if err != Err {
+		t.Error(err.Error())
+		return
+	}
+	_, err = db.Query("SELECT * FROM T3_1 WHERE ID=? AND NAME=?", 1, "A")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	_, err = db.Query("SELECT * FROM T3_1 WHERE ID=? AND NAME=?", 1, "A")
+	if err != Err {
+		t.Error(err.Error())
+		return
+	}
+	//
+	_, err = db.Query("SELECT * FROM T4 WHERE ID=? AND NAME=?", 1, "A")
+	if err != Err {
+		t.Error(err.Error())
+		return
+	}
+	_, err = db.Query("SELECT * FROM T4_1 WHERE ID=? AND NAME=?", 1, "A")
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+	_, err = db.Query("SELECT * FROM T4_1 WHERE ID=? AND NAME=?", 1, "A")
+	if err != Err {
+		t.Error(err.Error())
+		return
+	}
+	//
+	fmt.Println("all end")
 }

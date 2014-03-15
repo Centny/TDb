@@ -52,6 +52,10 @@ var TarErrsC map[TDbErr]int = map[TDbErr]int{}
 //the execute count.
 var RTarErrsC map[TDbErr]int = map[TDbErr]int{}
 
+//the execute count.
+var RSqlQueryC map[string]int = map[string]int{}
+var RSqlExecC map[string]map[string]int = map[string]map[string]int{}
+
 //if error contain target error.
 func (t TDbErr) Is(e TDbErr) bool {
 	defer func() {
@@ -78,8 +82,10 @@ func SetErrC(e TDbErr, c int) {
 }
 
 //reset the execute count
-func ResetRTarErrsC() {
+func ResetErrsC() {
 	RTarErrsC = map[TDbErr]int{}
+	RSqlQueryC = map[string]int{}
+	RSqlExecC = map[string]map[string]int{}
 }
 
 //all testing data from json file.
@@ -166,7 +172,19 @@ func (c *TDbConn) Prepare(query string) (driver.Stmt, error) {
 		return nil, Err
 	}
 	if iv, ok := c.TData[query]; ok {
+		defer func() {
+			RSqlQueryC[query] = RSqlQueryC[query] + 1
+		}()
 		mv := iv.(map[string]interface{})
+		if _, ok := RSqlQueryC[query]; !ok {
+			RSqlQueryC[query] = 0
+		}
+		if ec, ok := mv["ERR_C"]; ok {
+			if RSqlQueryC[query] == int(ec.(float64)) {
+				return nil, Err
+			}
+		}
+		//
 		stmt := TDbStmt{}
 		stmt.Sql = query
 		stmt.Conn = c
@@ -230,11 +248,29 @@ func (s *TDbStmt) Query(args []driver.Value) (driver.Rows, error) {
 	if TarErrs.Is(STMT_QUERY_ERR) {
 		return nil, Err
 	}
-	mv, ok := s.TData[FmtArgs(args)]
+	fargs := FmtArgs(args)
+	mv, ok := s.TData[fargs]
 	if !ok {
 		mv, ok = s.TData["*"]
 	}
 	if ok {
+		defer func() {
+			RSqlExecC[s.Sql][fargs] = RSqlExecC[s.Sql][fargs] + 1
+		}()
+		if _, ok := RSqlExecC[s.Sql]; !ok {
+			RSqlExecC[s.Sql] = map[string]int{}
+		}
+		if _, ok := RSqlExecC[s.Sql][fargs]; !ok {
+			RSqlExecC[s.Sql][fargs] = 0
+		}
+		if emv, ok := s.TData["ERR_V"]; ok {
+			if ec, ok := emv.(map[string]interface{})[fargs]; ok {
+				if RSqlExecC[s.Sql][fargs] == int(ec.(float64)) {
+					return nil, Err
+				}
+			}
+		}
+		//
 		trow := TDbRows{}
 		trow.Args = args
 		trow.Stmt = s
@@ -242,7 +278,7 @@ func (s *TDbStmt) Query(args []driver.Value) (driver.Rows, error) {
 		trow.CIdx = 0
 		return &trow, nil
 	} else {
-		return nil, NotFoundErr(FmtArgs(args))
+		return nil, NotFoundErr(fargs)
 	}
 }
 
@@ -250,11 +286,29 @@ func (s *TDbStmt) Exec(args []driver.Value) (driver.Result, error) {
 	if TarErrs.Is(STMT_EXEC_ERR) {
 		return nil, Err
 	}
-	mv, ok := s.TData[FmtArgs(args)]
+	fargs := FmtArgs(args)
+	mv, ok := s.TData[fargs]
 	if !ok {
 		mv, ok = s.TData["*"]
 	}
 	if ok {
+		defer func() {
+			RSqlExecC[s.Sql][fargs] = RSqlExecC[s.Sql][fargs] + 1
+		}()
+		if _, ok := RSqlExecC[s.Sql]; !ok {
+			RSqlExecC[s.Sql] = map[string]int{}
+		}
+		if _, ok := RSqlExecC[s.Sql][fargs]; !ok {
+			RSqlExecC[s.Sql][fargs] = 0
+		}
+		if emv, ok := s.TData["ERR_V"]; ok {
+			if ec, ok := emv.(map[string]interface{})[fargs]; ok {
+				if RSqlExecC[s.Sql][fargs] == int(ec.(float64)) {
+					return nil, Err
+				}
+			}
+		}
+		//
 		res := mv.(map[string]interface{})
 		tres := TDbResult{}
 		tres.Args = args
@@ -267,7 +321,7 @@ func (s *TDbStmt) Exec(args []driver.Value) (driver.Result, error) {
 		}
 		return &tres, nil
 	} else {
-		return nil, NotFoundErr(FmtArgs(args))
+		return nil, NotFoundErr(fargs)
 	}
 }
 

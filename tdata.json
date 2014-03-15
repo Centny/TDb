@@ -49,5 +49,91 @@
 		],
 		"V_COUNTS":2,
 		"V_COLUMN":"ID,NAME,V3"
+	},
+	"INSERT INTO T3 VALUES(?,?,?,?)": {
+		"ERR_C":0
+	},
+	"INSERT INTO T3_1 VALUES(?,?,?,?)": {
+		"[1 2 3 A]": {
+			"LIID": 1,
+			"AROW": 1
+		},
+		"V_COUNTS":4,
+		"ERR_C":1
+	},
+	"INSERT INTO T4 VALUES(?,?,?,?)": {
+		"*":{
+			"LIID": 1,
+			"AROW": 1
+			},
+		"V_COUNTS":4,
+		"ERR_V":{
+			"[1 2 3 A]":0
+			}
+	},
+	"INSERT INTO T4_1 VALUES(?,?,?,?)": {
+		"*":{
+			"LIID": 1,
+			"AROW": 1
+			},
+		"V_COUNTS":4,
+		"ERR_V":{
+			"[1 2 3 A]":1
+			}
+	},
+	"SELECT * FROM T3 WHERE ID=? AND NAME=?": {
+		"ERR_C":0
+	},
+	"SELECT * FROM T3_1 WHERE ID=? AND NAME=?": {
+		"*": [
+			{
+				"ID": 1,
+				"NAME": "testing",
+				"V3": "value abc"
+			},
+			{
+				"ID": 1,
+				"NAME": "testing"
+			}
+		],
+		"V_COUNTS":2,
+		"V_COLUMN":"ID,NAME,V3",
+		"ERR_C":1
+	},
+	"SELECT * FROM T4 WHERE ID=? AND NAME=?": {
+		"*": [
+			{
+				"ID": 1,
+				"NAME": "testing",
+				"V3": "value abc"
+			},
+			{
+				"ID": 1,
+				"NAME": "testing"
+			}
+		],
+		"V_COUNTS":2,
+		"V_COLUMN":"ID,NAME,V3",
+		"ERR_V":{
+			"[1 A]":0
+			}
+	},
+	"SELECT * FROM T4_1 WHERE ID=? AND NAME=?": {
+		"*": [
+			{
+				"ID": 1,
+				"NAME": "testing",
+				"V3": "value abc"
+			},
+			{
+				"ID": 1,
+				"NAME": "testing"
+			}
+		],
+		"V_COUNTS":2,
+		"V_COLUMN":"ID,NAME,V3",
+		"ERR_V":{
+			"[1 A]":1
+			}
 	}
 }
