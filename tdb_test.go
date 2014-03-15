@@ -27,6 +27,13 @@ func TestTDb(t *testing.T) {
 		t.Error(err.Error())
 		return
 	}
+	res, err = tx.Exec(`
+		INSERT INTO TESTING VALUES(?,?,?,?)
+		`, 1, 2, 3, 4)
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
 	fmt.Println(res.LastInsertId())
 	fmt.Println(res.RowsAffected())
 	res, err = tx.Exec("INSERT INTO T2 VALUES(?,?,?,?)", 1, 2, 3, 6)

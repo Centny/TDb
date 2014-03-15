@@ -97,7 +97,8 @@ func AddTData(n string, path string) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	dec := json.NewDecoder(strings.NewReader(string(bys)))
+	sbys := strings.Replace(string(bys), "\n", "", -1)
+	dec := json.NewDecoder(strings.NewReader(sbys))
 	var data map[string]interface{}
 	err = dec.Decode(&data)
 	if err != nil {
@@ -171,6 +172,8 @@ func (c *TDbConn) Prepare(query string) (driver.Stmt, error) {
 	if TarErrs.Is(PREPARE_ERR) {
 		return nil, Err
 	}
+	query = strings.Replace(query, "\n", "", -1)
+	query = strings.TrimSpace(query)
 	if iv, ok := c.TData[query]; ok {
 		defer func() {
 			RSqlQueryC[query] = RSqlQueryC[query] + 1
