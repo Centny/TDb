@@ -3,7 +3,7 @@ package TDb
 import (
 	"database/sql"
 	"fmt"
-	"github.com/Centny/Cny4go/dbutil"
+	"github.com/Centny/gwf/dbutil"
 	"strings"
 	// "time"
 	// "fmt"
